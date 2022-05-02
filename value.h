@@ -1,27 +1,20 @@
 #include <cstddef>
-#include <initializer_list>
+#include <stdexcept>
 #include <string>
+#include <utility>
+#include <unordered_map>
 #include <vector>
 
 #ifndef JSON_TYPE__VALUE_H_
 #define JSON_TYPE__VALUE_H_
 
-
 namespace json {
 
-// JSON uses unicode strings
-// TODO finish comment
-#if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
-typedef typename std::wstring u_string;
-#else
-typedef typename std::string u_string;
-#endif
-
 enum class ValueType {
-  kString,
-  kNumber,
   kObject,
   kArray,
+  kString,
+  kNumber,
   kTrue,
   kFalse,
   kNull,
@@ -32,61 +25,60 @@ class Value {
   ValueType type_;
 
  public:
-  explicit Value(ValueType type)
-      : type_(type) {}
-  Value(const double value)
-      : type_(ValueType::kNumber) {}
-  Value(const int value)
-      : type_(ValueType::kNumber) {}
-  Value(const u_string&& string)
-      : type_(ValueType::kString) {}
-  Value(const char* string)
-      : type_(ValueType::kString) {}
-  Value(const bool value) {
-    if (value) {
-      type_ = ValueType::kTrue;
-      return;
-    }
-    type_ = ValueType::kFalse;
-  }
-  Value(std::nullptr_t value)
-      : type_(ValueType::kNull) {}
-  Value(const Value& value) = default;
-  Value(Value&& value) = default;
+  explicit Value(const ValueType type) noexcept: type_(type) {}
+  ValueType GetType() noexcept { return type_; }
 };
 
 class StringValue : public Value {
-  u_string literal_;
+  std::string literal_;
  public:
-  StringValue(const u_string&& string)
-      : Value(ValueType::kString), literal_(string) {}
-  StringValue(const char* string)
-      : Value(ValueType::kString), literal_(string) {}
+  explicit StringValue(std::string &v) noexcept
+      : Value(ValueType::kString), literal_(std::move(v)) {}
+  explicit StringValue(const char *v) noexcept
+      : Value(ValueType::kString), literal_(std::string(v)) {}
+  operator std::string() const { return literal_; }
 };
 
 class NumberValue : public Value {
   double literal_;
  public:
-  NumberValue(const double value)
-      : Value(ValueType::kNumber), literal_(value) {}
+  explicit NumberValue(const double v) noexcept
+      : Value(ValueType::kNumber), literal_(v) {}
+  operator double() const { return literal_; }
 };
 
 class ObjectValue : public Value {
-
+  typedef typename std::unordered_map<std::string, Value *> member_map;
+  member_map members_;
+ public:
+  void insert(std::string &k, Value* v) { members_.insert({k, v}); }
+  ObjectValue()
+      : Value(ValueType::kObject), members_() {}
+  explicit ObjectValue(member_map &v)
+      : Value(ValueType::kObject), members_(std::move(v)) {}
+  ~ObjectValue() noexcept {
+    for (auto &[k, v] : members_) {
+      delete v;
+    }
+  }
 };
 
 class ArrayValue : public Value {
-  std::vector<Value> literal_;
+  typedef typename std::vector<Value *> element_vector;
+  element_vector elements_;
  public:
-  ArrayValue(const std::vector<Value>&& value)
-      : Value(ValueType::kArray), literal_(value) {}
-  ArrayValue(const Value* value)
-      : Value(ValueType::kArray), literal_{value} {}
-  ArrayValue(const std::initializer_list<Value>&& value)
-      : Value(ValueType::kArray), literal_{value} {}
+  void push_back(Value *v) { elements_.push_back(v); }
+  ArrayValue()
+      : Value(ValueType::kArray), elements_() {}
+  explicit ArrayValue(element_vector &v)
+      : Value(ValueType::kArray), elements_(std::move(v)) {}
+  ~ArrayValue() noexcept {
+    for (auto v : elements_) {
+      delete v;
+    }
+  }
 };
 
 }
-
 
 #endif //JSON_TYPE__VALUE_H_

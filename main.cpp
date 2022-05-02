@@ -1,10 +1,11 @@
+#include <iostream>
+
 #include "json.h"
 
 int main() {
-  json::NumberValue numVal = 5.6;
-  json::StringValue strVal = "hello";
-  json::Value boolVal = true;
-  json::Value nullVal = nullptr;
-  json::Value fStrVal = "fff";
-  //
+  // TODO substr not working correctly
+  json::JSON json_1("[ {} ]");
+//  auto* number_value = (json::NumberValue *) json_1.value_;
+//  auto string_value = (json::StringValue *) json_1.value_;
+  int i = 0;
 }
