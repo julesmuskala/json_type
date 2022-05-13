@@ -51,7 +51,7 @@ class ObjectValue : public Value {
   typedef typename std::unordered_map<std::string, Value *> member_map;
   member_map members_;
  public:
-  void insert(std::string &k, Value* v) { members_.insert({k, v}); }
+  void insert(const std::string &&k, Value* v) { members_.insert({k, v}); }
   ObjectValue()
       : Value(ValueType::kObject), members_() {}
   explicit ObjectValue(member_map &v)

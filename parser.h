@@ -117,7 +117,7 @@ class Parser {
       Expect(':');
       Whitespace();
       auto value = ParseValue();
-      obj->insert(key, value);
+      obj->insert(std::move(key), value);
     } while (ExpectNextMember());
 
     Expect('}');
