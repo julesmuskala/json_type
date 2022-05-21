@@ -14,6 +14,7 @@ class Parser {
   std::size_t line_ = 0;
   std::size_t column_ = 0;
 
+  // TODO substitute for custom error
   void inline ThrowParseError(const std::string& message) const {
     throw std::logic_error("At line " + std::to_string(line_ + 1) + ", column " + std::to_string(column_ + 1) + " " + message);
   }
@@ -21,7 +22,6 @@ class Parser {
   char inline CurrentChar() { return source_[pos_]; }
   bool inline Match(const char c) { return CurrentChar() == c; }
   bool inline MatchPrevious(const char c) { return source_[pos_ - 1] == c; }
-//  bool inline MatchNext(const char c) { return !IsAtEnd() && source_[pos_ + 1] == c; }
 
   bool inline IsAtEnd() { return pos_ >= source_.size() + 1; }
   bool inline IsAtStrEnd() {
@@ -117,7 +117,7 @@ class Parser {
       Expect(':');
       Whitespace();
       auto value = ParseValue();
-      obj->insert(std::move(key), value);
+      obj->insert(key, value);
     } while (ExpectNextMember());
 
     Expect('}');

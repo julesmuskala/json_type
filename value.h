@@ -101,7 +101,7 @@ class ObjectValue : public Value {
   [[nodiscard]] bool empty() const noexcept { return members_.empty(); }
   [[nodiscard]] std::size_t size() const noexcept { return members_.size(); }
 
-  void insert(const std::string &&k, Value *v) { members_.insert({k, v}); }
+  void insert(std::string &k, Value *v) { members_.insert({k, v}); }
 
   Value *at(const std::string &s) { return members_.at(s); }
   Value *operator[](const std::string &s) { return members_[s]; }

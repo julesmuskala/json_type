@@ -52,7 +52,7 @@ class Generator {
       InsertNewline();
       IncrementIndent();
       auto i = array_value->begin();
-      auto end = array_value->end();
+      const auto end = array_value->end();
       do {
         InsertIndent();
         GenerateValue(*i);
@@ -74,7 +74,7 @@ class Generator {
       InsertNewline();
       IncrementIndent();
       auto i = obj_value->begin();
-      auto end = obj_value->end();
+      const auto end = obj_value->end();
       do {
         auto [k, v] = *i;
         InsertIndent();

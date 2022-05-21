@@ -10,24 +10,44 @@
 namespace json {
 
 class JSON {
- public:
   Value *value_;
+  ValueType base_type_;
+
+  bool delete_value_;
+
+ public:
   explicit JSON(const std::string &s) {
     Parser parser(s);
     value_ = parser.Parse();
+    base_type_ = value_->Type();
+    delete_value_ = true;
   }
+  explicit JSON(Value *ptr) noexcept
+      : value_(ptr), base_type_(ptr->Type()), delete_value_(false) {}
 
-  [[nodiscard]] std::string Stringify() const {
+  explicit JSON(Value &value) noexcept
+      : value_(&value), base_type_(value.Type()), delete_value_(false) {}
+
+  [[nodiscard]] std::string Stringify() const noexcept {
     Generator generator(value_);
     return generator.generate();
   }
-  [[nodiscard]] std::string Stringify(int indent_amount) const {
+  [[nodiscard]] std::string Stringify(int indent_amount) const noexcept {
     Generator generator(value_, indent_amount);
     return generator.generate();
   }
 
+  Value *GetValue() noexcept {
+    return value_;
+  }
+  ValueType GetType() noexcept {
+    return base_type_;
+  }
+
   ~JSON() noexcept {
-    delete value_;
+    if (delete_value_) {
+      delete value_;
+    }
   }
 };
 
