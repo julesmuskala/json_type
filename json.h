@@ -21,6 +21,11 @@ class JSON {
     Generator generator(value_);
     return generator.generate();
   }
+  [[nodiscard]] std::string Stringify(int indent_amount) const {
+    Generator generator(value_, indent_amount);
+    return generator.generate();
+  }
+
   ~JSON() noexcept {
     delete value_;
   }
