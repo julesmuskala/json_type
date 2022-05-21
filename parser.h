@@ -48,8 +48,8 @@ class Parser {
   void inline Expect(char c) {
     if (!Match(c)) {
       std::string msg = "expected '";
-      msg += c;
-      msg += '\'';
+      msg.push_back(c);
+      msg.push_back('\'');
       ThrowParseError(msg);
     }
     Advance();

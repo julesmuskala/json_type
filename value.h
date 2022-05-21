@@ -38,6 +38,34 @@ typedef std::unordered_map<std::string, Value *> member_map;
 class StringValue : public Value {
   std::string literal_;
  public:
+  char at(std::size_t i) { return literal_.at(i); }
+  char operator[](std::size_t i) { return literal_[i]; }
+  char front() noexcept { return literal_.front(); }
+  char back() noexcept { return literal_.back(); }
+
+  auto begin() noexcept { return literal_.begin(); }
+  [[nodiscard]] auto cbegin() const noexcept { return literal_.cbegin(); }
+  auto end() noexcept { return literal_.end(); }
+  [[nodiscard]] auto cend() const noexcept { return literal_.cend(); }
+  auto rbegin() noexcept { return literal_.rbegin(); }
+  [[nodiscard]] auto crbegin() const noexcept { return literal_.crbegin(); }
+  auto rend() noexcept { return literal_.rend(); }
+  [[nodiscard]] auto crend() const noexcept { return literal_.crend(); }
+
+  [[nodiscard]] bool empty() const noexcept { return literal_.empty(); }
+  [[nodiscard]] std::size_t size() const noexcept { return literal_.size(); }
+  [[nodiscard]] std::size_t length() const noexcept { return literal_.length(); }
+
+  auto find(const std::string &s) { return literal_.find(s); }
+  auto rfind(const std::string &s) { return literal_.rfind(s); }
+  auto find_first_of(const std::string &s) { return literal_.find_first_of(s); }
+  auto find_first_not_of(const std::string &s) { return literal_.find_first_not_of(s); }
+  auto find_last_of(const std::string &s) { return literal_.find_last_of(s); }
+  auto find_last_not_of(const std::string &s) { return literal_.find_last_not_of(s); }
+
+  friend bool operator==(const StringValue &lv, const StringValue &rv) {
+    return lv.literal_ == rv.literal_;
+  }
 
   explicit StringValue(std::string &v) noexcept
       : Value(ValueType::kString), literal_(std::move(v)) {}
