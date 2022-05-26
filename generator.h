@@ -34,10 +34,10 @@ class Generator {
   }
 
   void inline GenerateNumber(Value *value) {
-    ss_ << *((NumberValue *) value);
+    ss_ << value->AsNumber();
   }
   void inline GenerateString(Value *value) {
-    GenerateString((*(StringValue *) value));
+    GenerateString(value->AsString());
   }
   void inline GenerateString(const std::string &string) {
     ss_ << '"';
@@ -47,12 +47,12 @@ class Generator {
   void GenerateArray(Value *value) {
     ss_ << '[';
 
-    auto array_value = (ArrayValue *) value;
-    if (!array_value->empty()) {
+    auto array_value = value->AsArray();
+    if (!array_value.empty()) {
       InsertNewline();
       IncrementIndent();
-      auto i = array_value->begin();
-      const auto end = array_value->end();
+      auto i = array_value.begin();
+      const auto end = array_value.end();
       do {
         InsertIndent();
         GenerateValue(*i);
@@ -68,13 +68,13 @@ class Generator {
   void GenerateObject(Value *value) {
     ss_ << '{';
 
-    auto obj_value = (ObjectValue *) value;
-    bool is_obj_empty = obj_value->empty();
+    auto obj_value = value->AsObject();
+    bool is_obj_empty = obj_value.empty();
     if (!is_obj_empty) {
       InsertNewline();
       IncrementIndent();
-      auto i = obj_value->begin();
-      const auto end = obj_value->end();
+      auto i = obj_value.begin();
+      const auto end = obj_value.end();
       do {
         auto [k, v] = *i;
         InsertIndent();

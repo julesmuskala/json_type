@@ -1,6 +1,7 @@
 #include <string>
 #include <stdexcept>
 
+#include "parse_error.h"
 #include "value.h"
 
 #ifndef JSON_TYPE__PARSER_H_
@@ -14,10 +15,7 @@ class Parser {
   std::size_t line_ = 0;
   std::size_t column_ = 0;
 
-  // TODO substitute for custom error
-  void inline ThrowParseError(const std::string& message) const {
-    throw std::logic_error("At line " + std::to_string(line_ + 1) + ", column " + std::to_string(column_ + 1) + " " + message);
-  }
+  Value *parse_value_;
 
   char inline CurrentChar() { return source_[pos_]; }
   bool inline Match(const char c) { return CurrentChar() == c; }
@@ -26,7 +24,7 @@ class Parser {
   bool inline IsAtEnd() { return pos_ >= source_.size() + 1; }
   bool inline IsAtStrEnd() {
     if (IsAtEnd() || Match('\n')) {
-      ThrowParseError("unterminated string literal");
+      throw ParseError(line_, column_, "unterminated string literal");
     }
     if (Match('"')) {
       if (MatchPrevious('\\')) {
@@ -39,7 +37,7 @@ class Parser {
 
   void inline Advance() {
     if (IsAtEnd()) {
-      ThrowParseError("tried advancing past terminal character");
+      throw ParseError(line_, column_, "tried advancing past terminal character");
     }
     ++pos_;
     ++column_;
@@ -50,7 +48,7 @@ class Parser {
       std::string msg = "expected '";
       msg.push_back(c);
       msg.push_back('\'');
-      ThrowParseError(msg);
+      throw ParseError(line_, column_, msg);
     }
     Advance();
   }
@@ -82,10 +80,10 @@ class Parser {
         }
       }
     }
-    ThrowParseError("unrecognized value");
+    throw ParseError(line_, column_, "unrecognized value");
   }
 
-  bool ExpectComma(const char end_char, const std::string& expected_message) {
+  bool ExpectComma(const char end_char, const std::string &expected_message) {
     Whitespace();
     if (!Match(',')) {
       return false;
@@ -93,7 +91,7 @@ class Parser {
     Advance();
     Whitespace();
     if (Match(end_char)) {
-      ThrowParseError("expected " + expected_message);
+      throw ParseError(line_, column_, "expected " + expected_message);
     }
     return true;
   }
@@ -166,7 +164,7 @@ class Parser {
     if (IsSeparator()) {
       Advance();
       if (!Integer()) {
-        ThrowParseError("expected digits after separator");
+        throw ParseError(line_, column_, "expected digits after separator");
       }
     }
   }
@@ -177,7 +175,7 @@ class Parser {
         Advance();
       }
       if (!Integer()) {
-        ThrowParseError("expected digits after exponent");
+        throw ParseError(line_, column_, "expected digits after exponent");
       }
     }
   }
@@ -211,7 +209,7 @@ class Parser {
         return new Value(ValueType::kTrue);
       case 'f':ExpectWord("false");
         return new Value(ValueType::kFalse);
-      default:ThrowParseError("unrecognized value");
+      default:throw ParseError(line_, column_, "unrecognized value");
     }
   }
 
@@ -234,7 +232,7 @@ class Parser {
 
  public:
   explicit Parser(std::string s)
-      : source_(std::move(s)) {}
+      : source_(std::move(s)), parse_value_(nullptr) {}
   Value *Parse() {
     if (source_.empty()) {
       return new Value(ValueType::kNull);
@@ -246,7 +244,16 @@ class Parser {
       return new Value(ValueType::kNull);
     }
 
-    return ParseValue();
+    try {
+      parse_value_ = ParseValue();
+    } catch (const std::exception& e) {
+      if (parse_value_ != nullptr) {
+        delete parse_value_;
+      }
+      throw e;
+    }
+
+    return parse_value_;
   }
 };
 

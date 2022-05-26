@@ -21,7 +21,10 @@ enum class ValueType {
   kNull,
 };
 
-// TODO Use factory function for constructing Values?
+class StringValue;
+class NumberValue;
+class ObjectValue;
+class ArrayValue;
 
 class Value {
  protected:
@@ -30,6 +33,31 @@ class Value {
  public:
   explicit Value(const ValueType type) noexcept: type_(type) {}
   ValueType Type() noexcept { return type_; }
+
+  StringValue& AsString() {
+    if (type_ != ValueType::kString) {
+      throw std::runtime_error("Value is not a string");
+    }
+    return (StringValue&)*this;
+  }
+  NumberValue& AsNumber() {
+    if (type_ != ValueType::kNumber) {
+      throw std::runtime_error("Value is not a number");
+    }
+    return (NumberValue&)*this;
+  }
+  ObjectValue& AsObject() {
+    if (type_ != ValueType::kObject) {
+      throw std::runtime_error("Value is not an object");
+    }
+    return (ObjectValue&)*this;
+  }
+  ArrayValue& AsArray() {
+    if (type_ != ValueType::kArray) {
+      throw std::runtime_error("Value is not an array");
+    }
+    return (ArrayValue&)*this;
+  }
 };
 
 typedef std::vector<Value *> element_vector;
@@ -71,6 +99,7 @@ class StringValue : public Value {
       : Value(ValueType::kString), literal_(std::move(v)) {}
   explicit StringValue(const char *v) noexcept
       : Value(ValueType::kString), literal_(std::string(v)) {}
+
   operator std::string() const { return literal_; }
   friend std::ostream &operator<<(std::ostream &os, const StringValue &v) {
     os << v.literal_;
@@ -83,6 +112,7 @@ class NumberValue : public Value {
  public:
   explicit NumberValue(const double v) noexcept
       : Value(ValueType::kNumber), literal_(v) {}
+
   operator double() const { return literal_; }
   friend std::ostream &operator<<(std::ostream &os, const NumberValue &v) {
     os << v.literal_;
