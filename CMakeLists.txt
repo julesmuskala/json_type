@@ -3,4 +3,4 @@ project(json_type)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(json_type main.cpp value.h json.h parser.h generator.h)
+add_executable(json_type value.h json.h parser.h generator.h)
