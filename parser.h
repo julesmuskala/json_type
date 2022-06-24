@@ -204,11 +204,11 @@ class Parser {
     char start_char = CurrentChar();
     switch (start_char) {
       case 'n':ExpectWord("null");
-        return new Value(ValueType::kNull);
+        return new NullValue();
       case 't':ExpectWord("true");
-        return new Value(ValueType::kTrue);
+        return new BoolValue(true);
       case 'f':ExpectWord("false");
-        return new Value(ValueType::kFalse);
+        return new BoolValue(false);
       default:throw ParseError(line_, column_, "unrecognized value");
     }
   }

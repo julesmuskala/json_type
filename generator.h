@@ -126,9 +126,7 @@ class Generator {
   }
 
  public:
-  explicit Generator(Value *value)
-      : value_(value), indent_amount_(-1), current_indent_(0) {}
-  explicit Generator(Value *value, int indent_amount)
+  explicit Generator(Value *value, const int indent_amount = -1)
       : value_(value), indent_amount_(indent_amount), current_indent_(0) {}
   std::string generate() {
     GenerateValue(value_);

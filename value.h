@@ -21,6 +21,8 @@ enum class ValueType {
   kNull,
 };
 
+class BoolValue;
+class NullValue;
 class StringValue;
 class NumberValue;
 class ObjectValue;
@@ -34,6 +36,18 @@ class Value {
   explicit Value(const ValueType type) noexcept: type_(type) {}
   ValueType Type() noexcept { return type_; }
 
+  BoolValue& AsBool() {
+    if ((type_ != ValueType::kTrue) || (type_ != ValueType::kFalse)) {
+      throw std::runtime_error("Value is not a boolean");
+    }
+    return (BoolValue&)*this;
+  }
+  NullValue& AsNull() {
+    if (type_ != ValueType::kNull) {
+      throw std::runtime_error("Value is not a null");
+    }
+    return (NullValue&)*this;
+  }
   StringValue& AsString() {
     if (type_ != ValueType::kString) {
       throw std::runtime_error("Value is not a string");
@@ -62,6 +76,30 @@ class Value {
 
 typedef std::vector<Value *> element_vector;
 typedef std::unordered_map<std::string, Value *> member_map;
+
+class BoolValue : public Value {
+ public:
+  explicit BoolValue(const bool v) noexcept
+      : Value(v ? ValueType::kTrue : ValueType::kFalse) {}
+
+  operator bool() const { return type_ == ValueType::kTrue; }
+
+  friend bool operator==(const BoolValue &lv, const BoolValue &rv) {
+    return lv.type_ == rv.type_;
+  }
+};
+
+class NullValue : public Value {
+ public:
+  explicit NullValue() noexcept
+      : Value(ValueType::kNull) {}
+
+  operator std::nullptr_t() const { return nullptr; }
+
+  friend bool operator==(const NullValue &lv, const NullValue &rv) {
+    return lv.type_ == rv.type_;
+  }
+};
 
 class StringValue : public Value {
   std::string literal_;

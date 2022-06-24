@@ -37,18 +37,11 @@ class JSON {
   /**
    * @param int - indent amount; negative or no value will result if minified json
   */
-  [[nodiscard]] std::string Stringify() const noexcept {
-    Generator generator(value_);
-    return generator.generate();
-  }
-  /**
-   * @param int - indent amount; negative or no value will result if minified json
-  */
-  [[nodiscard]] std::string Stringify(int indent_amount) const noexcept {
+  [[nodiscard]] std::string Stringify(const int indent_amount = -1) const noexcept {
     Generator generator(value_, indent_amount);
     return generator.generate();
   }
-  static std::string Stringify(JSON& json, int indent_amount) noexcept {
+  static std::string Stringify(JSON& json, const int indent_amount = -1) noexcept {
     Generator generator(json.GetValue(), indent_amount);
     return generator.generate();
   }
